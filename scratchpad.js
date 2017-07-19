@@ -131,4 +131,4 @@ PokerHand.prototype.compareWith = function(hand){
 var test = new PokerHand("10H JH QH KH AH")
 // test.hasFlush()
 test.hasStraight()
-test.hasStraightFlush()
+test.hasStraightFlush();
