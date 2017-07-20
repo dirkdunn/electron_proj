@@ -1,7 +1,7 @@
 var Result = { "win": 1, "loss": 2, "tie": 3 }
 var cardValues = {
   2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,
-  10:10,J:11,Q:12,K:13,A:14
+  10:10,T:10,J:11,Q:12,K:13,A:14
 }
 
 var handValues = {
@@ -24,9 +24,9 @@ function PokerHand(hand) {
 
 PokerHand.prototype.findHand = function(hand){
   if(this.hasRoyalFlush(hand)){return 9;}
-  else if(this.hasStraightFlush(hand)){return 7;}
-  else if(this.hasFourOfAKind(hand)){return 6;}
-  else if(this.hasFullHouse(hand)){return 5;}
+  else if(this.hasStraightFlush(hand)){return 8;}
+  else if(this.hasFourOfAKind(hand)){return 7;}
+  else if(this.hasFullHouse(hand)){return 6;}
   else if(this.hasFlush(hand)){return 5;}
   else if(this.hasStraight(hand)){return 4;}
   else if(this.hasThreeOfAKind(hand)){return 3;}
@@ -51,7 +51,9 @@ PokerHand.prototype.getNumericalHand = function(hand){
 // Has functions return bool.
 PokerHand.prototype.hasFlush = function(hand){
   var cardSum = "";
-  this.hand.split(/\s/).forEach(function(card){
+  hand = hand || this.hand;
+
+  hand.split(/\s/).forEach(function(card){
     if(card.length === 3){
       cardSum += card[2]
     } else {
@@ -65,9 +67,10 @@ PokerHand.prototype.hasFlush = function(hand){
 
 }
 
-PokerHand.prototype.hasStraight = function(){
+PokerHand.prototype.hasStraight = function(hand){
   var isStraight = true;
-  var numericalHand = this.getNumericalHand(this.hand)
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand)
 
   for(var i = 0;i<numericalHand.length-1;i++){
     if((numericalHand[i+1] - numericalHand[i]) !== 1){
@@ -80,32 +83,37 @@ PokerHand.prototype.hasStraight = function(){
 }
 
 PokerHand.prototype.hasRoyalFlush = function(hand){
-  var hasAce = this.hand.indexOf('A') != -1;
-  var hasKing = this.hand.indexOf('K') != -1;
-  var hasQueen = this.hand.indexOf('Q') != -1;
-  var hasJack = this.hand.indexOf('J') != -1;
-  var hasTen = this.hand.indexOf('10') != -1;
-  //  && this.hasFlush(hand)
-  if(hasAce && hasKing && hasQueen && hasJack && hasTen){
-    return true;
-  } else {
-    return false;
+  hand = hand || this.hand;
+  var hasAce = hand.indexOf('A') != -1;
+  var hasKing = hand.indexOf('K') != -1;
+  var hasQueen = hand.indexOf('Q') != -1;
+  var hasJack = hand.indexOf('J') != -1;
+  var hasTen = hand.indexOf('10') != -1;
+  var royalFlush = false;
+  // console.log(hasAce,hasKing,hasQueen,hasJack,hasTen,this.hasFlush(hand))
+  if(hasAce && hasKing && hasQueen && hasJack && hasTen && this.hasFlush(hand)){
+    royalFlush = true;
   }
+
+  return royalFlush;
 
 }
 
 PokerHand.prototype.hasStraightFlush = function(hand){
-  return this.hasStraight(this.hand) && this.hasFlush(this.hand);
+  hand = hand || this.hand;
+  return this.hasStraight(hand) && this.hasFlush(hand);
 }
 
 PokerHand.prototype.hasFourOfAKind = function(hand){
-  var numericalHand = this.getNumericalHand(this.hand).join(' ') + ' ';
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
   // console.log('num hand: ', numericalHand)
   return /(\d|\w+\s?)\1{3}/.test(numericalHand);
 }
 
-PokerHand.prototype.hasFullHouse = function(){
-  var numericalHand = this.getNumericalHand(this.hand).join(' ') + ' ';
+PokerHand.prototype.hasFullHouse = function(hand){
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
   var hasThreeOfAKind = /(\d|\w+\s?)\1{2}/.test(numericalHand);
   var fullHouse = false;
 
@@ -121,36 +129,70 @@ PokerHand.prototype.hasFullHouse = function(){
   return fullHouse;
 }
 
-PokerHand.prototype.hasThreeOfAKind = function(){
-  var numericalHand = this.getNumericalHand(this.hand).join(' ') + ' ';
+PokerHand.prototype.hasThreeOfAKind = function(hand){
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
   // console.log('num hand: ', numericalHand)
   return /(\d|\w+\s?)\1{2}/.test(numericalHand);
 }
 
 PokerHand.prototype.hasTwoPairs = function(hand){
-  var numericalHand = this.getNumericalHand(this.hand).join(' ') + ' ';
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
   var twoPair = numericalHand.match(/(\d+\s?)\1{1}/g).length == 2;
 
   return twoPair;
 }
 
 PokerHand.prototype.hasPair = function(hand){
-  var numericalHand = this.getNumericalHand(this.hand).join(' ') + ' ';
+  hand = hand || this.hand;
+  var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
   var pair = numericalHand.match(/(\d+\s?)\1{1}/g).length == 1;
 
   return pair;
 }
 
-PokerHand.prototype.compareWith = function(hand){
+PokerHand.prototype.tieBreaker = function(yourHand,opponentHand){
+  var playerHighCard = Math.max.apply(this,this.getNumericalHand(yourHand));
+  var opponentHighCard = Math.max.apply(this,this.getNumericalHand(opponentHand));
+
+  // console.log('tiebreaker: ',playerHighCard,opponentHighCard)
+  if(playerHighCard > opponentHighCard){
+    return Result.win;
+  }
+  else if(playerHighCard < opponentHighCard){
+    return Result.loss;
+  }
+  else if(playerHighCard === opponentHighCard){
     return Result.tie;
+  }
+  else{
+    console.error("An error occurred in tieBreaker.");
+  }
 }
 
-var test = new PokerHand("10H JH QH KH AH")
-// test.hasStraight()
-// test.hasStraightFlush();
-var test2 = new PokerHand("10H 9H 10H 10H AH")
-console.log('TOAK: ',test2.hasThreeOfAKind())
-console.log('FOAK: ', test2.hasFourOfAKind())
-console.log('FH', test2.hasFullHouse())
-console.log('TP: ',test2.hasTwoPairs())
-console.log('P: ', test2.hasPair())
+PokerHand.prototype.compareWith = function(opponent){
+  // console.log(opponent.hand)
+    var opponentHandValue = this.findHand(opponent.hand);
+    // console.log('Your Hand: ', this.handValue, "Opponent Hand: ", opponentHandValue)
+
+    if(this.handValue > opponentHandValue){
+      return Result.win;
+    } else if(this.handValue < opponentHandValue){
+      return Result.loss;
+    } else if (this.handValue === opponentHandValue){
+      return this.tieBreaker(this.hand,opponent.hand);
+    }
+}
+
+
+var test2 = new PokerHand("6S AD 7H 4S AS")
+var opponentHand = new PokerHand("AH AC 5H 6H 7S")
+
+console.log(test2.compareWith(opponentHand))
+
+// console.log('TOAK: ',test2.hasThreeOfAKind())
+// console.log('FOAK: ', test2.hasFourOfAKind())
+// console.log('FH', test2.hasFullHouse())
+// console.log('TP: ',test2.hasTwoPairs())
+// console.log('P: ', test2.hasPair())
