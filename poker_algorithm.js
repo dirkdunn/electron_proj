@@ -139,7 +139,9 @@ PokerHand.prototype.hasThreeOfAKind = function(hand){
 PokerHand.prototype.hasTwoPairs = function(hand){
   hand = hand || this.hand;
   var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
-  var twoPair = numericalHand.match(/(\d+\s?)\1{1}/g).length == 2;
+  var numberOfPairs = numericalHand.match(/(\d+\s?)\1{1}/g) || [];
+  var twoPair = numberOfPairs.length == 2;
+
 
   return twoPair;
 }
@@ -147,14 +149,17 @@ PokerHand.prototype.hasTwoPairs = function(hand){
 PokerHand.prototype.hasPair = function(hand){
   hand = hand || this.hand;
   var numericalHand = this.getNumericalHand(hand).join(' ') + ' ';
-  var pair = numericalHand.match(/(\d+\s?)\1{1}/g).length == 1;
+  var numberOfPairs = numericalHand.match(/(\d+\s?)\1{1}/g) || [];
+  var pair = numberOfPairs.length == 1;
 
   return pair;
 }
 
 PokerHand.prototype.tieBreaker = function(yourHand,opponentHand){
-  var playerHighCard = Math.max.apply(this,this.getNumericalHand(yourHand));
-  var opponentHighCard = Math.max.apply(this,this.getNumericalHand(opponentHand));
+  // var playerHighCard = Math.max.apply(this,this.getNumericalHand(yourHand));
+  // var opponentHighCard = Math.max.apply(this,this.getNumericalHand(opponentHand));
+  var playerHighCard = this.getNumericalHand(yourHand).reduce(function(p,c){ return p+c; });
+  var opponentHighCard = this.getNumericalHand(opponentHand).reduce(function(p,c){ return p+c; });
 
   // console.log('tiebreaker: ',playerHighCard,opponentHighCard)
   if(playerHighCard > opponentHighCard){
@@ -185,10 +190,13 @@ PokerHand.prototype.compareWith = function(opponent){
     }
 }
 
+// Pair 2
+// var test2 = new PokerHand("6S AD 7H 4S AS")
+// var opponentHand = new PokerHand("AH AC 5H 6H 7S")
 
-var test2 = new PokerHand("6S AD 7H 4S AS")
+// Pair Nothing
+var test2 = new PokerHand("2S AH 4H 5S KC")
 var opponentHand = new PokerHand("AH AC 5H 6H 7S")
-
 console.log(test2.compareWith(opponentHand))
 
 // console.log('TOAK: ',test2.hasThreeOfAKind())
