@@ -161,7 +161,7 @@ PokerHand.prototype.tieBreaker = function(yourHand,opponentHand){
   var playerHighCard = this.getNumericalHand(yourHand).reduce(function(p,c){ return p+c; });
   var opponentHighCard = this.getNumericalHand(opponentHand).reduce(function(p,c){ return p+c; });
 
-  // console.log('tiebreaker: ',playerHighCard,opponentHighCard)
+  console.log('tiebreaker: ',playerHighCard,opponentHighCard)
   if(playerHighCard > opponentHighCard){
     return Result.win;
   }
